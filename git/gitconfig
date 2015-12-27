@@ -1,0 +1,32 @@
+[include]
+  path = ~/.gitconfig.local
+[user]
+  email = r.mizokami@gmail.com
+  name = mizokami
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  grep = auto
+[core]
+  excludesfile = ~/.gitignore
+  quotepath = false
+  precomposeunicode = true
+  editor = /usr/bin/vim
+[push]
+  default = current
+[alias]
+  # @see http://qiita.com/kyanny/items/10a57a4f1d2806e3a3b8
+  delete-merged-branches = !git branch --merged | grep -v \\* | grep -v master | xargs -I % git branch -d %
+  # @see http://d.hatena.ne.jp/thinca/20120924/1348491052
+  cancel = !git commit -a -m 'Temporary commit for cancel' && git reset --hard HEAD~
+[merge]
+  tool = vimdiff
+[pull]
+	rebase = true
+[github]
+	user = mizoR
+[ghi]
+	token = !security find-internet-password -a mizoR -s github.com -l 'ghi token' -w
+[ghq]
+  root = ~/src
