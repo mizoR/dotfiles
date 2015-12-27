@@ -2,11 +2,30 @@ require 'rake'
 require 'fileutils'
 
 desc 'Hook our dotfiles into system-standard positions'
-task :install do
+task :install => [:submodule_init, :submodules] do
   install_files(Dir.glob('{vim,vimrc}'))
   install_files(Dir.glob('tmux/*'))
+  install_files(Dir.glob('{oh-my-zsh,zsh-completions}'))
+  install_files(Dir.glob('zsh/*'))
 
   success_msg('installed')
+end
+
+task :submodule_init do
+  run %{ git submodule update --init --recursive }
+end
+
+desc "Init and update submodules."
+task :submodules do
+  puts "======================================================"
+  puts "Downloading dotfiles submodules...please wait"
+  puts "======================================================"
+
+  run %{
+    git submodule update --recursive
+    git clean -df
+  }
+  puts
 end
 
 private
