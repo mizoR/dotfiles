@@ -4,6 +4,7 @@ require 'fileutils'
 desc 'Hook our dotfiles into system-standard positions'
 task :install do
   install_files(Dir.glob('{vim,vimrc}'))
+  install_files(Dir.glob('tmux/*'))
 
   success_msg('installed')
 end
