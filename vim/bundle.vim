@@ -17,9 +17,9 @@ call neobundle#begin(expand('~/.vim/bundle/'))
 " Required:
 NeoBundleFetch 'Shougo/neobundle.vim'
 
-" My Bundles here:
-" Refer to |:NeoBundle-examples|.
-" Note: You don't set neobundle setting in .gvimrc!
+" Auto load all plugins
+set runtimepath+=~/.vim/
+runtime! bundle_config/*.vim
 
 call neobundle#end()
 
