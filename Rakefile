@@ -9,6 +9,8 @@ task :install => [:submodule_init, :submodules] do
   install_files(Dir.glob('zsh/*'))
   install_files(Dir.glob('git/*'))
 
+  install_sdkman
+
   success_msg('installed')
 end
 
@@ -56,6 +58,18 @@ def install_files(files)
     puts "=========================================================="
     puts
   end
+end
+
+def install_sdkman
+  puts "======================sdkman=============================="
+  if File.exists?('~/.sdkman')
+    puts "Already installed."
+    return
+  end
+
+  run %{ curl -s http://get.sdkman.io | bash }
+  puts "=========================================================="
+  puts
 end
 
 def success_msg(action)
