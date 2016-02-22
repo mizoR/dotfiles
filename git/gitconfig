@@ -13,6 +13,7 @@
   quotepath = false
   precomposeunicode = true
   editor = /usr/bin/vim
+  autocrlf = input
 [push]
   default = current
 [alias]
@@ -23,10 +24,10 @@
 [merge]
   tool = vimdiff
 [pull]
-	rebase = true
+  rebase = true
 [github]
-	user = mizoR
+  user = mizoR
 [ghi]
-	token = !security find-internet-password -a mizoR -s github.com -l 'ghi token' -w
+  token = !security find-internet-password -a mizoR -s github.com -l 'ghi token' -w
 [ghq]
   root = ~/src
