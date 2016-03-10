@@ -20,7 +20,7 @@ if [[ ":$PATH:" != *:"$HOME/bin":* ]]; then
   export PATH="$HOME/bin:$PATH"
 fi
 
-if [ -L ~/.rbenv ]; then
+if [ -d ~/.rbenv ]; then
   export PATH="$HOME/.rbenv/bin:$PATH"
   eval "$(rbenv init -)"
 fi
