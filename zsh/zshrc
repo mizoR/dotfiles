@@ -37,6 +37,11 @@ if [ -d ~/.rbenv ]; then
   eval "$(rbenv init -)"
 fi
 
+if [ -d ~/.exenv ]; then
+  export PATH="$HOME/.exenv/bin:$PATH"
+  eval "$(exenv init -)"
+fi
+
 if [ -d ~/.nodebrew ]; then
   export NODEBREW_ROOT=$HOME/.nodebrew
   export PATH=$NODEBREW_ROOT/current/bin:$PATH
