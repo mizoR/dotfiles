@@ -1,4 +1,6 @@
 " Customize indentation
+autocmd BufNewFile,BufRead *.pl     set expandtab   tabstop=4 shiftwidth=4
+autocmd BufNewFile,BufRead *.pm     set expandtab   tabstop=4 shiftwidth=4
 autocmd BufNewFile,BufRead *.java   set expandtab   tabstop=4 shiftwidth=4
 autocmd BufNewFile,BufRead *.gradle set expandtab   tabstop=4 shiftwidth=4
 autocmd BufNewFile,BufRead *.groovy set expandtab   tabstop=4 shiftwidth=4
