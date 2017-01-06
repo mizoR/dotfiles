@@ -1,3 +1,3 @@
-NeoBundle 'petdance/vim-perl'
+NeoBundle 'vim-perl/vim-perl'
 NeoBundle 'hotchpotch/perldoc-vim'
 
