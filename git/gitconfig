@@ -25,8 +25,10 @@
   cancel = !git commit -a -m 'Temporary commit for cancel' && git reset --hard HEAD~
 [merge]
   tool = vimdiff
+  ff = false
 [pull]
   rebase = true
+  ff = only
 [github]
   user = mizoR
 [ghi]
