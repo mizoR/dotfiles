@@ -12,6 +12,7 @@ autocmd BufNewFile,BufRead *.tt     setf tt2html " see: http://qiita.com/soymsk/
 autocmd BufNewFile,BufRead *.ru     set filetype=ruby
 autocmd BufNewFile,BufRead Gemfile  set filetype=ruby
 autocmd BufNewFile,BufRead Podfile  set filetype=ruby
+autocmd BufNewFile,BufRead Capfile  set filetype=ruby
 autocmd BufNewFile,BufRead Vagrantfile set filetype=ruby
 
 " Input current date
