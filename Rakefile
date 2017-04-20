@@ -44,20 +44,35 @@ def install_files(files)
     source = "#{ENV["PWD"]}/#{f}"
     target = "#{ENV["HOME"]}/.#{file}"
 
-    puts "======================#{file}=============================="
-    puts "Source: #{source}"
-    puts "Target: #{target}"
+    installing(file) do
+      backup(source, target)
 
-    if File.exists?(target) && (!File.symlink?(target) || (File.symlink?(target) && File.readlink(target) != source))
-      puts "[Overwriting] #{target}...leaving original at #{target}.backup..."
-      run %{ mv "$HOME/.#{file}" "$HOME/.#{file}.backup" }
+      link_nfs(source, target)
     end
-
-    run %{ ln -nfs "#{source}" "#{target}" }
-
-    puts "=========================================================="
-    puts
   end
+end
+
+def installing(file)
+  puts "======================#{file}=============================="
+
+  yield
+
+  puts "=========================================================="
+  puts
+end
+
+def backup(source, target)
+  if File.exists?(target) && (!File.symlink?(target) || (File.symlink?(target) && File.readlink(target) != source))
+    puts "[Overwriting] #{target}...leaving original at #{target}.backup..."
+    run %{ mv "#{target}" "#{target}.backup" }
+  end
+end
+
+def link_nfs(source, target)
+  puts "Source: #{source}"
+  puts "Target: #{target}"
+
+  run %{ ln -nfs "#{source}" "#{target}" }
 end
 
 def install_sdkman
