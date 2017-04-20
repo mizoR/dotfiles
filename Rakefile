@@ -9,6 +9,20 @@ task :install => [:submodule_init, :submodules] do
   install_files(Dir.glob('zsh/*'))
   install_files(Dir.glob('git/*'))
 
+  FileUtils.mkdir_p File.join(ENV['HOME'], '.config', 'fish')
+
+  link_with_backup(
+    File.join(ENV['PWD'],   'config', 'fish', 'fishfile'),
+    File.join(ENV['HOME'], '.config', 'fish', 'fishfile'),
+  )
+
+  %w|alias.fish config.fish|.each do |f|
+    link_with_backup(
+      File.join(ENV['PWD'],   'config', 'fish', 'conf.d', f),
+      File.join(ENV['HOME'], '.config', 'fish', 'conf.d', f),
+    )
+  end
+
   install_sdkman
 
   success_msg('installed')
@@ -45,11 +59,14 @@ def install_files(files)
     target = "#{ENV["HOME"]}/.#{file}"
 
     installing(file) do
-      backup(source, target)
-
-      link_nfs(source, target)
+      link_with_backup(source, target)
     end
   end
+end
+
+def link_with_backup(source, target)
+  backup(source, target)
+  link_nfs(source, target)
 end
 
 def installing(file)
