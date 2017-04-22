@@ -15,3 +15,7 @@ if test -d $HOME/.plenv
   set -gx PATH $PLENV_ROOT/bin $PATH
   plenv init - | source
 end
+
+if test -s $HOME/.kiex/scripts/kiex.fish
+  source $HOME/.kiex/scripts/kiex.fish
+end
