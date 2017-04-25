@@ -1,0 +1,1 @@
+NeoBundle 'dag/vim-fish'
