@@ -19,3 +19,8 @@ end
 if test -s $HOME/.kiex/scripts/kiex.fish
   source $HOME/.kiex/scripts/kiex.fish
 end
+
+if test -d ~/.nodebrew
+  set -gx NODEBREW_ROOT $HOME/.nodebrew
+  set -gx PATH $NODEBREW_ROOT/current/bin $PATH
+end
