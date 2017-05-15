@@ -1,6 +1,7 @@
 which go >/dev/null 2>&1
 if test $status -eq 0
-  set -gx GOROOT `go env GOROOT`
+  set -gx GOROOT ''   # HACK: Failed "go env GOROOT" without this line.
+  set -gx GOROOT (go env GOROOT)
   set -gx GOPATH $HOME
   set -gx PATH $PATH $GOROOT/bin $GOPATH/bin
 end
