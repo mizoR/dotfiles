@@ -1,3 +1,7 @@
+# see: http://codehex.hateblo.jp/entry/2016/10/08/162833
+set -gx OPENSSL_INCLUDE /usr/local/opt/openssl/include
+set -gx OPENSSL_LIB     /usr/local/opt/openssl/lib
+
 which go >/dev/null 2>&1
 if test $status -eq 0
   set -gx GOROOT ''   # HACK: Failed "go env GOROOT" without this line.
@@ -9,6 +13,13 @@ end
 if test -d $HOME/.rbenv
   set -gx PATH $HOME/.rbenv/bin $PATH
   rbenv init - | source
+end
+
+if test -d $HOME/.pyenv
+  set -gx PYENV_ROOT $HOME/.pyenv
+  set -gx PATH $PYENV_ROOT/bin $PATH
+  pyenv init - | source
+  pyenv virtualenv-init - | source
 end
 
 if test -d $HOME/.plenv
