@@ -16,6 +16,11 @@ task :install => [:submodule_init, :submodules] do
     File.join(ENV['HOME'], '.config', 'fish', 'fishfile'),
   )
 
+  link_with_backup(
+    File.join(ENV['PWD'],   'config', 'fish', 'config.fish'),
+    File.join(ENV['HOME'], '.config', 'fish', 'config.fish'),
+  )
+
   %w|alias.fish config.fish|.each do |f|
     link_with_backup(
       File.join(ENV['PWD'],   'config', 'fish', 'conf.d', f),
