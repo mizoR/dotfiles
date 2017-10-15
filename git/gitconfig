@@ -16,6 +16,7 @@
   precomposeunicode = true
   editor = /usr/bin/vim
   autocrlf = input
+	pager = less -x4
 [push]
   default = current
 [alias]
