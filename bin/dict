@@ -1,0 +1,29 @@
+#!/usr/bin/python2.7
+
+import sys
+from DictionaryServices import *
+
+def main():
+    quiet = False
+
+    if len(sys.argv) <= 1:
+        sys.exit(1)
+
+    if (sys.argv[1] == '-q') and (len(sys.argv) == 3):
+        quiet = True
+        word = sys.argv[2].decode('utf-8')
+    else:
+        word = sys.argv[1].decode('utf-8')
+
+    result = DCSCopyTextDefinition(None, word, (0, len(word)))
+
+    if not result:
+        sys.exit(1)
+
+    if quiet:
+        sys.exit(0)
+
+    print(result.encode('utf-8'))
+
+if __name__ == '__main__':
+    main()
