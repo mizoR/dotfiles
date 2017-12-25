@@ -40,3 +40,8 @@ end
 if test -d ~/dotfiles/bin
   set -gx PATH ~/dotfiles/bin $PATH
 end
+
+which direnv >/dev/null 2>&1
+if test $status -eq 0
+  eval (direnv hook fish)
+end
