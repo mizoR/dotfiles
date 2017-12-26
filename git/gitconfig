@@ -24,6 +24,8 @@
   delete-merged-branches = !git branch --merged | grep -v \\* | grep -v master | xargs -I % git branch -d %
   # @see http://d.hatena.ne.jp/thinca/20120924/1348491052
   cancel = !git commit -a -m 'Temporary commit for cancel' && git reset --hard HEAD~
+  # https://speakerdeck.com/hotchpotch/pull-request-woli-yong-sitakai-fa-wakuhuro#47
+  fetch-pulls = !git fetch origin +refs/pull/*:refs/remotes/pull/*
 [merge]
   tool = vimdiff
   ff = false
