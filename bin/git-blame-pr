@@ -1,30 +1,43 @@
-#!/usr/bin/perl
+#!/usr/bin/env ruby
 
-# see: http://blog.kazuhooku.com/2017/12/git-blame.html
+class PrIdFinder
+  RE_MESSAGE = /Merge\s+(?:pull\s+request|pr)\s+\#?(\d+)\s/i
 
-use strict;
-use warnings;
+  def self.find(sha)
+    return cache[sha] if cache.key?(sha)
 
-my $git_blame_pid = open(my $fh, "-|", "git", "blame", "--first-parent", @ARGV)
-    or die "failed to invoke git-blame:$!";
+    message = `git show --oneline #{sha}`
 
-my %cached; # commit-id -> substitution string
+    cache[sha] = (message =~ RE_MESSAGE) ? "PR ##{$1}" : nil
+  end
 
-while (my $line = <$fh>) {
-    my ($commit, $src) = split / .*?\) /, $line, 2;
-    $cached{$commit} = lookup($commit)
-        unless $cached{$commit};
-    print $cached{$commit}, ' ', $src;
-}
+  private
 
-while (waitpid($git_blame_pid, 0) != $git_blame_pid) {}
-exit $?;
+  def self.cache
+    @cache ||= {}
+  end
+end
 
-sub lookup {
-    my $commit = shift;
-    my $message = `git show --oneline $commit`;
-    if ($message =~ /Merge\s+(?:pull\s+request|pr)\s+\#?(\d+)\s/i) {
-        return sprintf '%-9s', "PR #$1";
+class Printer
+  def initialize(file:)
+    if !File.exist?(file)
+      raise "file not found: #{file}"
+    end
+
+    @file = file
+  end
+
+  def print
+    open("| git blame --first-parent #{@file} | cat") { |io|
+      io.each_line.with_index(1) do |line, i|
+        sha, src = line.split(/ .*?\) /)
+
+        id = PrIdFinder.find(sha) || sha
+
+        puts "#{id.ljust(11)} #{i.to_s.rjust(4)}) #{src}"
+      end
     }
-    return $commit;
-}
+  end
+end
+
+Printer.new(file: ARGV[0]).print
