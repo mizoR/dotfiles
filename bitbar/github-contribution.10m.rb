@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+#frozen_string_literal: true
 
 # <bitbar.title>Github Contribution</bitbar.title>
 # <bitbar.version>v0.0.1</bitbar.version>
@@ -58,10 +59,15 @@ module BitBar
       attr_reader :contributions
 
       class Helper
-        def link_to(text, href, options)
-          s = "#{text} | href=#{href}"
-          s << ' ' << options.map { |option| option.join('=') }.join(' ')
-          s
+        def link_to(text, href, options={})
+          s = +"#{text} | href=#{href}"
+
+          if !options.empty?
+            s << ' '
+            s << options.map { |option| option.join('=') }.join(' ')
+          end
+
+          s.freeze
         end
 
         def contribution_text_for(contribution)
