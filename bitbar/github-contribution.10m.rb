@@ -48,7 +48,7 @@ module BitBar
 
     class View
       TEMPLATE = <<-EOT.gsub(/^ */, '')
-        <%= contribution.icon %> <%= contribution.count %> | color=<%= contribution.color %>
+        <%= contribution.icon %><%= contribution.count %> | color=<%= contribution.color %>
         ---
         <% contributions.each do |c| -%>
         <%= helper.link_to(helper.contribution_text_for(c), helper.contribution_activity_for(c), color: c.color) %>
