@@ -26,6 +26,19 @@ module BitBar
         end
       end
 
+      def color
+        count <= 0 ? 'brown' : 'green'
+      end
+
+      def icon
+        case count
+        when 0    then ':poop:'
+        when 1..3 then ':seedling:'
+        when 4..9 then ':herb:'
+        else           ':deciduous_tree:'
+        end
+      end
+
       private
 
       def self.url_for(username:)
@@ -35,22 +48,24 @@ module BitBar
 
     class View
       TEMPLATE = <<-EOT.gsub(/^ */, '')
-        <%= icon %> <%= contribution_count %> contributions | color=<%= color %>
+        <%= contribution.icon %> <%= contribution.count %> | color=<%= contribution.color %>
         ---
         <% contributions.each do |c| -%>
-        <%= helper.link_to(helper.contribution_text_for(c), helper.contribution_activity_for(c)) %>
+        <%= helper.link_to(helper.contribution_text_for(c), helper.contribution_activity_for(c), color: c.color) %>
         <% end -%>
       EOT
 
       attr_reader :contributions
 
       class Helper
-        def link_to(text, href)
-          "#{text} | href=#{href}"
+        def link_to(text, href, options)
+          s = "#{text} | href=#{href}"
+          s << ' ' << options.map { |option| option.join('=') }.join(' ')
+          s
         end
 
         def contribution_text_for(contribution)
-          "#{contribution.contributed_on.strftime('%Y-%m-%d (%a)')}  \t#{contribution.count}"
+          "#{contribution.icon} #{contribution.contributed_on.strftime('%Y-%m-%d (%a)')}   \t#{contribution.count}"
         end
 
         def contribution_activity_for(contribution)
@@ -73,11 +88,9 @@ module BitBar
         contribution = contributions.fetch(0)
 
         locals = {
-          contributions:      contributions,
-          contribution_count: contribution.count,
-          icon:               contribution.count > 0 ? ':seedling:' : ':fallen_leaf:',
-          color:              contribution.count > 0 ? 'green' : 'brown',
-          helper:             Helper.new
+          contribution:  contribution,
+          contributions: contributions,
+          helper:        Helper.new,
         }
 
         b = binding
@@ -99,7 +112,9 @@ module BitBar
         puts <<-EOT.gsub(/^ */, '')
           ✖︎ | color=red
           ---
-          Error: #{error.message}
+          #{error.class}: #{error.message}
+          ---
+          #{error.backtrace.join(' ')}
         EOT
       end
     end
