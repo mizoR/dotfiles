@@ -6,9 +6,15 @@ class PrIdFinder
   def self.find(sha)
     return cache[sha] if cache.key?(sha)
 
-    message = `git show --oneline #{sha}`
+    message = `git show --oneline #{sha} 2>/dev/null`
 
     cache[sha] = (message =~ RE_MESSAGE) ? "PR ##{$1}" : nil
+  rescue ArgumentError => e
+    if e.message.start_with?('invalid byte sequence in ')
+      cache[sha] = nil
+    else
+      raise
+    end
   end
 
   private
