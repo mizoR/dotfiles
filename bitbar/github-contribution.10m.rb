@@ -7,12 +7,57 @@
 # <bitbar.author.github>mizoR</bitbar.author.github>
 # <bitbar.image>https://user-images.githubusercontent.com/1257116/34550684-37da7286-f156-11e7-9299-5873b6bb2fd7.png</bitbar.image>
 # <bitbar.dependencies>ruby</bitbar.dependencies>
+#
+# To setup, create or edit your ~/.bitbarrc file with a new section:
+#
+# [github_contribution]
+# username = mizoR
+# max_contributions = 10
 
 require 'erb'
 require 'date'
 require 'open-uri'
 
 module BitBar
+  class RcFile
+    def self.load(file = "#{ENV['HOME']}/.bitbarrc")
+      parse(open(file) { |f| f.read })
+    end
+
+    def self.parse(source)
+      sections = {}
+
+      section = nil
+
+      source.each_line do |line|
+        if line =~ /^ *;/
+          # comment
+          next
+        end
+
+        if line =~ /\[(.+)\]/
+          section = sections[$1.to_sym] = {}
+          next
+        end
+
+        if line =~ /(.+)=(.+)/
+          section[$1.strip.to_sym] = $2.gsub(/^[ "]*|[ "]*$/, '')
+          next
+        end
+      end
+
+      new(sections: sections)
+    end
+
+    def initialize(sections:)
+      @sections = sections
+    end
+
+    def [](name)
+      @sections[name.to_sym]
+    end
+  end
+
   module GitHubContribution
     class Contribution < Struct.new(:username, :contributed_on, :count)
       RE_CONTRIBUTION = %r|<rect class="day" .+ data-count="(\d+)" data-date="(\d\d\d\d-\d\d-\d\d)"/>|
@@ -122,21 +167,20 @@ module BitBar
     end
 
     class App
-      attr_reader :username
-
-      def initialize(username:)
-        @username = username
+      def initialize(username:, max_contributions: 10)
+        @username          = username
+        @max_contributions = max_contributions.to_i
       end
 
       def run
-        if username.to_s.empty?
+        if @username.to_s.empty?
           raise 'GitHub user is not given.'
         end
 
-        contributions = Contribution.find_all_by(username: username)
+        contributions = Contribution.find_all_by(username: @username)
                                     .sort_by(&:contributed_on)
                                     .reverse
-                                    .slice(0, 7)
+                                    .slice(0, @max_contributions)
 
         View.new(contributions: contributions).render
       rescue => e
@@ -149,9 +193,7 @@ module BitBar
 end
 
 if __FILE__ == $0
-  config = {
-    username: ARGV[0] || ENV['BITBAR_GITHUB_CONTRIBUTION_USERNAME'] || `git config --get github.user`.chomp
-  }
+  config = BitBar::RcFile.load[:github_contribution].to_h
 
   BitBar::GitHubContribution::App.new(config).run
 end

@@ -8,6 +8,7 @@ task :install => [:submodule_init, :submodules] do
   install_files(Dir.glob('{oh-my-zsh,zsh-completions}'))
   install_files(Dir.glob('zsh/*'))
   install_files(Dir.glob('git/*'))
+  install_files(Dir.glob('bitbarrc'))
 
   FileUtils.mkdir_p File.join(ENV['HOME'], '.config', 'fish')
 
