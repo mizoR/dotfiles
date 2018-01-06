@@ -35,13 +35,16 @@ module BitBar
           next
         end
 
-        if line =~ /\[(.+)\]/
+        if line =~ /^\[(.+)\]$/
           section = sections[$1.to_sym] = {}
           next
         end
 
         if line =~ /(.+)=(.+)/
-          section[$1.strip.to_sym] = $2.gsub(/^[ "]*|[ "]*$/, '')
+          name  = $1.strip.to_sym
+          value = $2.strip
+
+          section[name] = value[/^"(.+)"$/, 1] || value[/^'(.+)'$/, 1] || value
           next
         end
       end
@@ -88,7 +91,7 @@ module BitBar
       private
 
       def self.url_for(username:)
-        "https://github.com/users/%s/contributions" % username
+        "https://github.com/users/#{username}/contributions"
       end
     end
 
@@ -148,24 +151,6 @@ module BitBar
       end
     end
 
-    class ErrorView
-      attr_reader :error
-
-      def initialize(error:)
-        @error = error
-      end
-
-      def render
-        puts <<-EOT.gsub(/^ */, '')
-          ✖︎ | color=red
-          ---
-          #{error.class}: #{error.message}
-          ---
-          #{error.backtrace.join("\n")}
-        EOT
-      end
-    end
-
     class App
       def initialize(username:, max_contributions: 10)
         @username          = username
@@ -183,10 +168,6 @@ module BitBar
                                     .slice(0, @max_contributions)
 
         View.new(contributions: contributions).render
-      rescue => e
-        ErrorView.new(error: e).render
-
-        exit
       end
     end
   end
