@@ -75,14 +75,10 @@ module BitBar
         end
 
         def contribution_activity_for(contribution)
-          uri = URI::HTTPS.build(
-            host:     'github.com',
-            path:     "/#{contribution.username}",
-            query:    { from: contribution.contributed_on }.map { |kv| kv.join('=') }.join('&'),
-            fragment: "year-link-#{contribution.contributed_on.year}"
-          )
+          query    = "from=#{contribution.contributed_on}"
+          fragment = "year-link-#{contribution.contributed_on.year}"
 
-          uri.to_s
+          "https://github.com/#{contribution.username}?#{query}##{fragment}"
         end
       end
 
