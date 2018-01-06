@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 # <bitbar.title>Github Contribution</bitbar.title>
 # <bitbar.version>v0.0.1</bitbar.version>
@@ -126,6 +126,12 @@ module BitBar
     end
 
     class App
+      attr_reader :username
+
+      def initialize(username:)
+        @username = username
+      end
+
       def run
         if username.to_s.empty?
           raise 'GitHub user is not given.'
@@ -142,16 +148,14 @@ module BitBar
 
         exit
       end
-
-      private
-
-      def username
-        @username ||= ENV['BITBAR_GITHUB_CONTRIBUTION_USERNAME'] || `git config --get github.user`.chomp
-      end
     end
   end
 end
 
 if __FILE__ == $0
-  BitBar::GitHubContribution::App.new.run
+  config = {
+    username: ARGV[0] || ENV['BITBAR_GITHUB_CONTRIBUTION_USERNAME'] || `git config --get github.user`.chomp
+  }
+
+  BitBar::GitHubContribution::App.new(config).run
 end
