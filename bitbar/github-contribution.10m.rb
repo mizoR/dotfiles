@@ -25,6 +25,8 @@ module BitBar
     end
 
     def self.parse(source)
+      # XXX: This implementation isn't correct, but will work in most cases.
+      #      (Probably `StringScanner` will make code correct and clean.)
       sections = {}
 
       section = nil
