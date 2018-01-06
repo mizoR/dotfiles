@@ -120,7 +120,7 @@ module BitBar
           ---
           #{error.class}: #{error.message}
           ---
-          #{error.backtrace.join(' ')}
+          #{error.backtrace.join("\n")}
         EOT
       end
     end
