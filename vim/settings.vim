@@ -1,4 +1,5 @@
 " Customize indentation
+autocmd BufNewFile,BufRead *.c      set expandtab   tabstop=4 shiftwidth=4
 autocmd BufNewFile,BufRead *.pl     set expandtab   tabstop=4 shiftwidth=4
 autocmd BufNewFile,BufRead *.pm     set expandtab   tabstop=4 shiftwidth=4
 autocmd BufNewFile,BufRead *.t      set expandtab   tabstop=4 shiftwidth=4 filetype=perl
