@@ -46,7 +46,7 @@ module BitBar
           name  = $1.strip.to_sym
           value = $2.strip
 
-          section[name] = value[/^"(.+)"$/, 1] || value[/^'(.+)'$/, 1] || value
+          section[name] = value[/^"(.*)"$/, 1] || value[/^'(.*)'$/, 1] || value
           next
         end
       end
@@ -154,22 +154,38 @@ module BitBar
     end
 
     class App
-      def initialize(username:, max_contributions: 10)
-        @username          = username
-        @max_contributions = max_contributions.to_i
+      DEFAULT_CONFIG = { max_contributions: 10 }
+
+      def initialize(config = {})
+        config = cast_config(DEFAULT_CONFIG.merge(config))
+
+        @username, @max_contributions = config.values_at(:username, :max_contributions)
       end
 
       def run
-        if @username.to_s.empty?
-          raise 'GitHub user is not given.'
-        end
-
         contributions = Contribution.find_all_by(username: @username)
                                     .sort_by(&:contributed_on)
                                     .reverse
                                     .slice(0, @max_contributions)
 
         View.new(contributions: contributions).render
+      end
+
+      private
+
+      def cast_config(username:, max_contributions:)
+        username          = username.to_s
+        max_contributions = max_contributions.to_i
+
+        if username.empty?
+          raise 'GitHub username is not given.'
+        end
+
+        if !max_contributions.positive?
+          raise "Max contributions should be positive integer, but it was #{max_contributions}"
+        end
+
+        { username: username, max_contributions: max_contributions }
       end
     end
   end
