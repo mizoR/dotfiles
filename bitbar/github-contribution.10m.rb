@@ -19,11 +19,11 @@ require 'date'
 require 'open-uri'
 
 module BitBar
-  class RcFile
-    RcFileNotFound = Class.new(StandardError)
+  class INIFile
+    INIFileNotFound = Class.new(StandardError)
 
     def self.load(file = "#{ENV['HOME']}/.bitbarrc")
-      raise RcFileNotFound if !File.exist?(file)
+      raise INIFileNotFound if !File.exist?(file)
 
       parse(open(file) { |f| f.read })
     end
@@ -194,10 +194,10 @@ end
 
 if __FILE__ == $0
   begin
-    config = BitBar::RcFile.load[:github_contribution].to_h
+    config = BitBar::INIFile.load[:github_contribution].to_h
 
     BitBar::GitHubContribution::App.new(config).run
-  rescue BitBar::RcFile::RcFileNotFound
+  rescue BitBar::INIFile::INIFileNotFound
     puts <<-EOM.gsub(/^ */, '')
       ⚠️
       ---
