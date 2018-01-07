@@ -137,15 +137,14 @@ module BitBar
       end
 
       def render
-        locals = {
-          contribution:  @contribution,
-          contributions: @contributions,
-          helper:        @helper,
-        }
-
         b = binding
 
-        locals.each { |k, v| b.local_variable_set(k, v) }
+        instance_variables.each do |instance_variable|
+          name  = instance_variable.to_s.sub(/\A@/, '')
+          value = instance_variable_get(instance_variable)
+
+          b.local_variable_set(name, value)
+        end
 
         puts ERB.new(TEMPLATE, nil, '-').result(b)
       end
