@@ -20,7 +20,11 @@ require 'open-uri'
 
 module BitBar
   class RcFile
+    RcFileNotFound = Class.new(StandardError)
+
     def self.load(file = "#{ENV['HOME']}/.bitbarrc")
+      raise RcFileNotFound if !File.exist?(file)
+
       parse(open(file) { |f| f.read })
     end
 
@@ -189,7 +193,20 @@ module BitBar
 end
 
 if __FILE__ == $0
-  config = BitBar::RcFile.load[:github_contribution].to_h
+  begin
+    config = BitBar::RcFile.load[:github_contribution].to_h
 
-  BitBar::GitHubContribution::App.new(config).run
+    BitBar::GitHubContribution::App.new(config).run
+  rescue BitBar::RcFile::RcFileNotFound
+    puts <<-EOM.gsub(/^ */, '')
+      ⚠️
+      ---
+      To setup, create or edit your ~/.bitbarrc file with a new section:
+      |
+      ;# ~/.bitbarrc
+      [github_contribution]
+      username = <GITHUB USERNAME>
+      max_contributions = 10
+    EOM
+  end
 end
