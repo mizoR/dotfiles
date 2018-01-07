@@ -106,8 +106,6 @@ module BitBar
         <% end -%>
       EOT
 
-      attr_reader :contributions
-
       class Helper
         def link_to(text, href, options={})
           s = +"#{text} | href=#{href}"
@@ -133,16 +131,16 @@ module BitBar
       end
 
       def initialize(contributions:)
+        @contribution  = contributions.fetch(0)
         @contributions = contributions
+        @helper        = Helper.new
       end
 
       def render
-        contribution = contributions.fetch(0)
-
         locals = {
-          contribution:  contribution,
-          contributions: contributions,
-          helper:        Helper.new,
+          contribution:  @contribution,
+          contributions: @contributions,
+          helper:        @helper,
         }
 
         b = binding
