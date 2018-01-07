@@ -74,6 +74,8 @@ module BitBar
   end
 
   module GitHubContribution
+    ConfigurationError = Class.new(StandardError)
+
     class Contribution < Struct.new(:username, :contributed_on, :count)
       RE_CONTRIBUTION = %r|<rect class="day" .+ data-count="(\d+)" data-date="(\d\d\d\d-\d\d-\d\d)"/>|
 
@@ -180,16 +182,17 @@ module BitBar
 
       private
 
-      def cast_config(username:, max_contributions:)
-        username          = username.to_s
-        max_contributions = max_contributions.to_i
+      def cast_config(config)
+        username          = config[:username].to_s
+        max_contributions = config[:max_contributions].to_i
 
         if username.empty?
-          raise 'GitHub username is not given.'
+          raise ConfigurationError, 'GitHub username is not given.'
         end
 
         if !max_contributions.positive?
-          raise "Max contributions should be positive integer, but it was #{max_contributions}"
+          raise ConfigurationError,
+            "Max contributions should be positive integer, but it was #{max_contributions}"
         end
 
         { username: username, max_contributions: max_contributions }
@@ -214,5 +217,11 @@ if __FILE__ == $0
       username = <GITHUB_USERNAME>
       max_contributions = 10
     EOM
-  end
+  rescue BitBar::GitHubContribution::ConfigurationError => e
+    puts <<-EOM.gsub(/^ */, '')
+      ⚠️
+      ---
+      #{e.message}
+    EOM
+   end
 end
