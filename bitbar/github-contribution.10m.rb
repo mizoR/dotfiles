@@ -20,7 +20,11 @@ require 'open-uri'
 
 module BitBar
   class INIFile
-    INIFileNotFound = Class.new(StandardError)
+    Error = Class.new(StandardError)
+
+    INIFileNotFound = Class.new(Error)
+
+    SectionNotFound = Class.new(Error)
 
     def self.load(file = "#{ENV['HOME']}/.bitbarrc")
       raise INIFileNotFound if !File.exist?(file)
@@ -62,8 +66,10 @@ module BitBar
       @sections = sections
     end
 
-    def [](name)
-      @sections[name.to_sym]
+    def fetch(name)
+      @sections.fetch(name.to_sym)
+    rescue KeyError
+      raise SectionNotFound
     end
   end
 
@@ -194,10 +200,10 @@ end
 
 if __FILE__ == $0
   begin
-    config = BitBar::INIFile.load[:github_contribution].to_h
+    config = BitBar::INIFile.load.fetch(:github_contribution)
 
     BitBar::GitHubContribution::App.new(config).run
-  rescue BitBar::INIFile::INIFileNotFound
+  rescue BitBar::INIFile::Error
     puts <<-EOM.gsub(/^ */, '')
       ⚠️
       ---
@@ -205,7 +211,7 @@ if __FILE__ == $0
       |
       ;# ~/.bitbarrc
       [github_contribution]
-      username = <GITHUB USERNAME>
+      username = <GITHUB_USERNAME>
       max_contributions = 10
     EOM
   end
