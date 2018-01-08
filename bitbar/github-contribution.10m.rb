@@ -214,5 +214,5 @@ if __FILE__ == $0
       ---
       #{e.message}
     EOM
-   end
+  end
 end
