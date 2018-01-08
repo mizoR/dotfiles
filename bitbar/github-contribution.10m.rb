@@ -111,10 +111,10 @@ module BitBar
 
     class View
       TEMPLATE = <<-EOT.gsub(/^ */, '')
-        <%= contribution.icon %><%= contribution.count %> | color=<%= contribution.color %>
+        <%= @contribution.icon %><%= @contribution.count %> | color=<%= @contribution.color %>
         ---
-        <% contributions.each do |c| -%>
-        <%= helper.link_to(helper.contribution_text_for(c), helper.contribution_activity_for(c), color: c.color) %>
+        <% @contributions.each do |c| -%>
+        <%= @helper.link_to(@helper.contribution_text_for(c), @helper.contribution_activity_for(c), color: c.color) %>
         <% end -%>
       EOT
 
@@ -149,16 +149,7 @@ module BitBar
       end
 
       def render
-        b = binding
-
-        instance_variables.each do |instance_variable|
-          name  = instance_variable.to_s.sub(/\A@/, '')
-          value = instance_variable_get(instance_variable)
-
-          b.local_variable_set(name, value)
-        end
-
-        puts ERB.new(TEMPLATE, nil, '-').result(b)
+        puts ERB.new(TEMPLATE, nil, '-').result(binding)
       end
     end
 
