@@ -114,24 +114,21 @@ module BitBar
         <%= @contribution.icon %><%= @contribution.count %> | color=<%= @contribution.color %>
         ---
         <% @contributions.each do |c| -%>
-        <%= @helper.link_to(@helper.contribution_text_for(c), @helper.contribution_activity_for(c), color: c.color) %>
+        <%= @helper.link_to(@helper.contribution_text_for(c), @helper.contribution_activity_for(c)) %>
         <% end -%>
       EOT
 
       class Helper
-        def link_to(text, href, options={})
-          s = +"#{text} | href=#{href}"
-
-          if !options.empty?
-            s << ' '
-            s << options.map { |option| option.join('=') }.join(' ')
+        def link_to(text, href)
+          if text =~ / | /
+            "#{text} href=#{href}"
+          else
+            "#{text} | href=#{href}"
           end
-
-          s.freeze
         end
 
         def contribution_text_for(contribution)
-          "#{contribution.icon} #{contribution.contributed_on.strftime('%Y-%m-%d (%a)')}   \t#{contribution.count}"
+          "#{contribution.icon} #{contribution.contributed_on.strftime('%Y-%m-%d (%a)')}   \t#{contribution.count} | color=#{contribution.color}"
         end
 
         def contribution_activity_for(contribution)
