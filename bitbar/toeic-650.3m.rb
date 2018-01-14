@@ -4,6 +4,7 @@ require 'ostruct'
 require 'open-uri'
 require 'json'
 require 'cgi'
+require 'pstore'
 
 ENV['PATH'] = "#{ENV['HOME']}/bin:#{ENV['PATH']}"
 
@@ -45,6 +46,24 @@ objects.select!(&:itself)
 
 objects.shuffle!
 
+pstore = File.join(
+  __dir__,
+  'db',
+  File.basename(__FILE__).sub(/\.rb$/, '.pstore')
+)
+
+db = PStore.new(pstore)
+
+db.transaction do
+  db_objects = db.fetch(:objects, {})
+
+  objects.each do |object|
+    db_objects[object.word] = object.to_h
+  end
+
+  db[:objects] = db_objects
+end
+
 object = objects.first
 
 puts "🗽#{object.word}"
@@ -53,8 +72,21 @@ puts '---'
 
 puts objects.map { |o|
   <<-EOS.gsub(/^ */, '')
-    #{o.word} --- #{o.meaning} | href=https://eow.alc.co.jp/search?q=#{o.word}
+    #{o.word} --- #{o.meaning} | href=https://eow.alc.co.jp/search?q=#{URI.escape(o.word)}
     -- #{o.english} | color=grey
     -- #{o.japanese} | color=grey
   EOS
 }
+
+db.transaction do
+  puts '---'
+  puts 'Others'
+
+  db[:objects].sort_by { |k, _| k }.map { |_, h| OpenStruct.new(h) }.map do |o|
+    puts <<-EOS.gsub(/^ */, '')
+      -- #{o.word} --- #{o.meaning} | href=https://eow.alc.co.jp/search?q=#{URI.escape(o.word)}"
+      ---- #{o.english} | color=grey
+      ---- #{o.japanese} | color=grey
+    EOS
+  end
+end

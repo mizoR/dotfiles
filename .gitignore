@@ -3,3 +3,5 @@
 /vim/bundle/*
 /vim/view/
 !/vim/bundle/neobundle.vim
+/bitbar/db
+!/bitbar/db/.gitkeep
