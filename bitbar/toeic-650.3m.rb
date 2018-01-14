@@ -84,7 +84,7 @@ db.transaction do
 
   db[:objects].sort_by { |k, _| k }.map { |_, h| OpenStruct.new(h) }.map do |o|
     puts <<-EOS.gsub(/^ */, '')
-      -- #{o.word} --- #{o.meaning} | href=https://eow.alc.co.jp/search?q=#{URI.escape(o.word)}"
+      -- #{o.word} --- #{o.meaning} | href=https://eow.alc.co.jp/search?q=#{URI.escape(o.word)}
       ---- #{o.english} | color=grey
       ---- #{o.japanese} | color=grey
     EOS
