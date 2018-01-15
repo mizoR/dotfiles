@@ -16,22 +16,22 @@ source = IO.popen('pup p.tweet-text json{}', 'r+') do |io|
   io.read
 end
 
-objects = JSON.parse(source)
+words = JSON.parse(source)
 
-objects.map! { |o| CGI.unescapeHTML(o["text"].to_s) }
+words.map! { |o| CGI.unescapeHTML(o["text"].to_s) }
 
-objects.map! { |o| o.split("\n") }
+words.map! { |o| o.split("\n") }
 
-objects.map! { |lines|
+words.map! { |lines|
   if lines[0].to_s =~ /\A([a-zA-Z ]+)(\[.+\])?(.+)$/
-    word      = $1&.strip
+    text      = $1&.strip
     pronounce = $2&.strip
     meaning   = $3&.strip
 
     e, j = lines[-2] =~ /^[\!-\~\s]+$/ ? [-2, -1] : [-3, -2]
 
     params = {
-      word:      word,
+      text:      text,
       pronounce: pronounce,
       meaning:   meaning,
       english:   lines[e],
@@ -42,9 +42,9 @@ objects.map! { |lines|
   end
 }
 
-objects.select!(&:itself)
+words.select!(&:itself)
 
-objects.shuffle!
+words.shuffle!
 
 pstore = File.join(
   __dir__,
@@ -55,24 +55,24 @@ pstore = File.join(
 db = PStore.new(pstore)
 
 db.transaction do
-  db_objects = db.fetch(:objects, {})
+  db_words = db.fetch(:words, {})
 
-  objects.each do |object|
-    db_objects[object.word] = object.to_h
+  words.each do |word|
+    db_words[word.text] = word.to_h
   end
 
-  db[:objects] = db_objects
+  db[:words] = db_words
 end
 
-object = objects.first
+word = words.first
 
-puts "🗽#{object.word}"
+puts "🗽#{word.text}"
 
 puts '---'
 
-puts objects.map { |o|
+puts words.map { |o|
   <<-EOS.gsub(/^ */, '')
-    #{o.word} --- #{o.meaning} | href=https://eow.alc.co.jp/search?q=#{URI.escape(o.word)}
+    #{o.text} --- #{o.meaning} | href=https://eow.alc.co.jp/search?q=#{URI.escape(o.text)}
     -- #{o.english} | color=grey
     -- #{o.japanese} | color=grey
   EOS
@@ -82,9 +82,9 @@ db.transaction do
   puts '---'
   puts 'Others'
 
-  db[:objects].sort_by { |k, _| k }.map { |_, h| OpenStruct.new(h) }.map do |o|
+  db[:words].sort_by { |k, _| k }.map { |_, h| OpenStruct.new(h) }.map do |o|
     puts <<-EOS.gsub(/^ */, '')
-      -- #{o.word} --- #{o.meaning} | href=https://eow.alc.co.jp/search?q=#{URI.escape(o.word)}
+      -- #{o.text} --- #{o.meaning} | href=https://eow.alc.co.jp/search?q=#{URI.escape(o.text)}
       ---- #{o.english} | color=grey
       ---- #{o.japanese} | color=grey
     EOS
