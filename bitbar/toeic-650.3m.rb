@@ -8,15 +8,21 @@ require 'pstore'
 
 ENV['PATH'] = "#{ENV['HOME']}/bin:#{ENV['PATH']}"
 
-html = open('https://twitter.com/TOEIC6500') { |f| f.read }
+words = []
 
-source = IO.popen('pup p.tweet-text json{}', 'r+') do |io|
-  io.puts html
-  io.close_write
-  io.read
+urls = %w(https://twitter.com/TOEIC6500 https://twitter.com/TOEIC9000)
+
+urls.each do |url|
+  html = open(url) { |f| f.read }
+
+  source = IO.popen('pup p.tweet-text json{}', 'r+') do |io|
+    io.puts html
+    io.close_write
+    io.read
+  end
+
+  words.concat(JSON.parse(source))
 end
-
-words = JSON.parse(source)
 
 words.map! { |o| CGI.unescapeHTML(o["text"].to_s) }
 
@@ -30,15 +36,17 @@ words.map! { |lines|
 
     e, j = lines[-2] =~ /^[\!-\~\s]+$/ ? [-2, -1] : [-3, -2]
 
-    params = {
-      text:      text,
-      pronounce: pronounce,
-      meaning:   meaning,
-      english:   lines[e],
-      japanese:  lines[j],
-    }
+    if lines[e] && lines[j]
+      params = {
+        text:      text,
+        pronounce: pronounce,
+        meaning:   meaning,
+        english:   lines[e],
+        japanese:  lines[j],
+      }
 
-    OpenStruct.new(params)
+      OpenStruct.new(params)
+    end
   end
 }
 
