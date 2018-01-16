@@ -29,7 +29,7 @@ words.map! { |o| CGI.unescapeHTML(o["text"].to_s) }
 words.map! { |o| o.split("\n") }
 
 words.map! { |lines|
-  if lines[0].to_s =~ /\A([a-zA-Z ]+)(\[.+\])?(.+)$/
+  if lines[0].to_s =~ /\A([a-zA-Z ]+)(\[.+\])(.+)$/
     text      = $1&.strip
     pronounce = $2&.strip
     meaning   = $3&.strip
