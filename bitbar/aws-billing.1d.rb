@@ -14,14 +14,27 @@ module BitBar
   module AwsBilling
     class CloudWatch
       class Metric
-        attr_reader :original
+        class Statistics
+          def initialize(metric:, cloudwatch:)
+            @metric     = metric
+            @cloudwatch = cloudwatch
+          end
 
-        def self.wrap(metric)
-          new(original: metric)
+          def sum
+            @cloudwatch.get_metric_statistics(
+              namespace:   @metric['Namespace'],
+              metric_name: @metric['MetricName'],
+              dimensions:  @metric['Dimensions'].to_json,
+              statistics:  'Sum',
+            ).fetch(0).fetch('Sum')
+          end
         end
 
-        def initialize(original:)
-          @original = original
+        attr_reader :metric, :cloudwatch
+
+        def initialize(metric:, cloudwatch:)
+          @metric     = metric
+          @cloudwatch = cloudwatch
         end
 
         def service_name
@@ -29,13 +42,17 @@ module BitBar
         end
 
         def [](name)
-          original[name]
+          metric[name]
+        end
+
+        def statistics
+          Statistics.new(metric: self, cloudwatch: cloudwatch)
         end
 
         private
 
         def find_value_from_dementions_by(name:)
-          original['Dimensions'].find { |d| d['Name'] == name }&.fetch('Value')
+          metric['Dimensions'].find { |d| d['Name'] == name }&.fetch('Value')
         end
       end
 
@@ -48,7 +65,7 @@ module BitBar
 
         metrics = run(command).fetch('Metrics')
 
-        metrics.map { |m| Metric.wrap(m) }
+        metrics.map { |m| Metric.new(metric: m, cloudwatch: self) }
       end
 
       def get_metric_statistics(namespace:, metric_name:, dimensions:, statistics:, region: 'us-east-1', start_time: START_TIME, end_time: END_TIME, period: PERIOD)
@@ -86,33 +103,28 @@ module BitBar
           metric_name: 'EstimatedCharges',
         )
 
-        statistics = metrics.each_with_object({}) do |metric, hash|
-          sum = cloudwatch.get_metric_statistics(
-            namespace:   metric['Namespace'],
-            metric_name: metric['MetricName'],
-            dimensions:  metric['Dimensions'].to_json,
-            statistics:  'Sum',
-          ).fetch(0).fetch('Sum')
-
+        sums = metrics.each_with_object({}) do |metric, hash|
           service_name = metric.service_name || 'Total'
 
-          hash[service_name] = sum
+          hash[service_name] = metric.statistics.sum
         end
 
-        render(statistics: statistics)
+        render(sums: sums)
       end
 
       private
 
-      def render(statistics:)
-        puts "$#{statistics['Total']} | image=#{ICON}"
+      def render(sums:)
+        puts "$#{sums['Total']} | image=#{ICON}"
+
         puts '---'
 
-        statistics.each do |name, statistic|
-          puts "#{name}: $#{statistic} | color=grey"
+        sums.each do |name, sum|
+          puts "#{name}: $#{sum} | color=grey"
         end
 
         puts '---'
+
         puts 'Open CloudWatch | href=https://console.aws.amazon.com/cloudwatch/home'
       end
 
