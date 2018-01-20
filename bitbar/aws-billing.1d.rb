@@ -5,27 +5,38 @@ ENV['PATH'] = "/usr/local/bin:#{ENV['PATH']}"
 require 'date'
 require 'json'
 
-START_TIME = (Date.today - 1).to_datetime
-END_TIME   = Date.today.to_datetime - Rational(1, 86400)
-PERIOD     = 86400
-
 module BitBar
   module AwsBilling
     class CloudWatch
       class Metric
         class Statistics
-          def initialize(metric:, cloudwatch:)
+          def initialize(start_time:, end_time:, period:, metric:, cloudwatch:)
+            @start_time = start_time
+            @end_time   = end_time
+            @period     = period
             @metric     = metric
             @cloudwatch = cloudwatch
           end
 
           def sum
-            @cloudwatch.get_metric_statistics(
+            params = build_params.merge(statistics: 'Sum')
+
+            statistics = @cloudwatch.get_metric_statistics(params)
+
+            statistics.fetch(0).fetch('Sum')
+          end
+
+          private
+
+          def build_params
+            {
               namespace:   @metric['Namespace'],
               metric_name: @metric['MetricName'],
               dimensions:  @metric['Dimensions'].to_json,
-              statistics:  'Sum',
-            ).fetch(0).fetch('Sum')
+              start_time:  @start_time,
+              end_time:    @end_time,
+              period:      @period,
+            }
           end
         end
 
@@ -44,8 +55,14 @@ module BitBar
           metric[name]
         end
 
-        def statistics
-          Statistics.new(metric: self, cloudwatch: cloudwatch)
+        def build_statistics(start_time:, end_time:, period:)
+          Statistics.new(
+            start_time: start_time,
+            end_time:   end_time,
+            period:     period,
+            metric:     self,
+            cloudwatch: cloudwatch,
+          )
         end
 
         private
@@ -67,7 +84,7 @@ module BitBar
         metrics.map { |m| Metric.new(metric: m, cloudwatch: self) }
       end
 
-      def get_metric_statistics(namespace:, metric_name:, dimensions:, statistics:, region: 'us-east-1', start_time: START_TIME, end_time: END_TIME, period: PERIOD)
+      def get_metric_statistics(namespace:, metric_name:, dimensions:, statistics:, start_time:, end_time:, period:, region: 'us-east-1')
         command = %Q|aws cloudwatch get-metric-statistics \
                         --namespace '#{namespace}' \
                         --metric-name '#{metric_name}' \
@@ -96,7 +113,11 @@ module BitBar
         @cloudwatch = BitBar::AwsBilling::CloudWatch.new
       end
 
-      def run
+      def run(date:)
+        start_time = (date - 1).to_datetime
+        end_time   = date.to_datetime - Rational(1, 86400)
+        period     = 86400
+
         metrics = cloudwatch.list_metrics(
           namespace:    'AWS/Billing',
           dimensions:   [ { Name: 'Currency', Value: 'USD' } ].to_json,
@@ -106,7 +127,9 @@ module BitBar
         sums = metrics.each_with_object({}) do |metric, hash|
           service_name = metric.service_name || 'Total'
 
-          hash[service_name] = metric.statistics.sum
+          statistics = metric.build_statistics(start_time: start_time, end_time: end_time, period: period)
+
+          hash[service_name] = statistics.sum
         end
 
         render(sums: sums)
@@ -136,7 +159,7 @@ module BitBar
 end
 
 if __FILE__ == $0
-  BitBar::AwsBilling::App.new(icon: DATA.gets).run
+  BitBar::AwsBilling::App.new(icon: DATA.gets).run(date: Date.today)
 end
 
 __END__
