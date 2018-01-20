@@ -13,6 +13,32 @@ PERIOD     = 86400
 module BitBar
   module AwsBilling
     class CloudWatch
+      class Metric
+        attr_reader :original
+
+        def self.wrap(metric)
+          new(original: metric)
+        end
+
+        def initialize(original:)
+          @original = original
+        end
+
+        def service_name
+          find_value_from_dementions_by(name: 'ServiceName')
+        end
+
+        def [](name)
+          original[name]
+        end
+
+        private
+
+        def find_value_from_dementions_by(name:)
+          original['Dimensions'].find { |d| d['Name'] == name }&.fetch('Value')
+        end
+      end
+
       def list_metrics(namespace:, metric_name:, dimensions:, region: 'us-east-1')
         command = %Q|aws cloudwatch list-metrics \
                         --namespace '#{namespace}' \
@@ -20,7 +46,9 @@ module BitBar
                         --region '#{region}' \
                         --dimensions '#{dimensions}'|
 
-        run(command).fetch('Metrics')
+        metrics = run(command).fetch('Metrics')
+
+        metrics.map { |m| Metric.wrap(m) }
       end
 
       def get_metric_statistics(namespace:, metric_name:, dimensions:, statistics:, region: 'us-east-1', start_time: START_TIME, end_time: END_TIME, period: PERIOD)
@@ -66,7 +94,7 @@ module BitBar
             statistics:  'Sum',
           ).fetch(0).fetch('Sum')
 
-          service_name = find_value('ServiceName', from: metric['Dimensions']) || 'Total'
+          service_name = metric.service_name || 'Total'
 
           hash[service_name] = sum
         end
@@ -86,10 +114,6 @@ module BitBar
 
         puts '---'
         puts 'Open CloudWatch | href=https://console.aws.amazon.com/cloudwatch/home'
-      end
-
-      def find_value(name, from:)
-        from.find { |d| d['Name'] == name }&.fetch('Value')
       end
 
       def cloudwatch
