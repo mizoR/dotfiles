@@ -5,7 +5,6 @@ ENV['PATH'] = "/usr/local/bin:#{ENV['PATH']}"
 require 'date'
 require 'json'
 
-ICON       = DATA.gets
 START_TIME = (Date.today - 1).to_datetime
 END_TIME   = Date.today.to_datetime - Rational(1, 86400)
 PERIOD     = 86400
@@ -92,7 +91,8 @@ module BitBar
     end
 
     class App
-      def initialize
+      def initialize(icon:)
+        @icon       = icon
         @cloudwatch = BitBar::AwsBilling::CloudWatch.new
       end
 
@@ -115,7 +115,7 @@ module BitBar
       private
 
       def render(sums:)
-        puts "$#{sums['Total']} | image=#{ICON}"
+        puts "$#{sums['Total']} | image=#{@icon}"
 
         puts '---'
 
@@ -136,7 +136,7 @@ module BitBar
 end
 
 if __FILE__ == $0
-  BitBar::AwsBilling::App.new.run
+  BitBar::AwsBilling::App.new(icon: DATA.gets).run
 end
 
 __END__
