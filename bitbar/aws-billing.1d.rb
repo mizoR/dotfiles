@@ -40,7 +40,7 @@ module BitBar
 
         datapoints = JSON.parse(source).fetch('Datapoints')
 
-        datapoints.fetch(0).fetch('Sum')
+        datapoints.fetch(0).fetch(statistics)
       end
     end
 
