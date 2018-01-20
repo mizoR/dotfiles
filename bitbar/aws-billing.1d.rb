@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-ENV['PATH'] = "/usr/local/bin:#{ENV['PATH']}"
-
 require 'date'
 require 'json'
 
@@ -159,6 +157,8 @@ module BitBar
 end
 
 if __FILE__ == $0
+  ENV['PATH'] = "/usr/local/bin:#{ENV['PATH']}"
+
   BitBar::AwsBilling::App.new(icon: DATA.gets).run(date: Date.today)
 end
 
