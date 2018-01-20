@@ -20,27 +20,29 @@ module BitBar
                         --region '#{region}' \
                         --dimensions '#{dimensions}'|
 
-        source = open("| #{command}") { |io| io.read }
-
-        JSON.parse(source).fetch('Metrics')
+        run(command).fetch('Metrics')
       end
 
-      def get_metric_statistics(namespace:, metric_name:, dimensions:, region: 'us-east-1', statistics: 'Sum')
+      def get_metric_statistics(namespace:, metric_name:, dimensions:, statistics:, region: 'us-east-1', start_time: START_TIME, end_time: END_TIME, period: PERIOD)
         command = %Q|aws cloudwatch get-metric-statistics \
                         --namespace '#{namespace}' \
                         --metric-name '#{metric_name}' \
-                        --start-time '#{START_TIME}' \
-                        --end-time '#{END_TIME}' \
-                        --period '#{PERIOD}' \
+                        --start-time '#{start_time}' \
+                        --end-time '#{end_time}' \
+                        --period '#{period}' \
                         --statistics '#{statistics}' \
                         --region '#{region}' \
                         --dimensions '#{dimensions}'|
 
+        run(command).fetch('Datapoints')
+      end
+
+      private
+
+      def run(command)
         source = open("| #{command}") { |io| io.read }
 
-        datapoints = JSON.parse(source).fetch('Datapoints')
-
-        datapoints.fetch(0).fetch(statistics)
+        JSON.parse(source)
       end
     end
 
@@ -57,15 +59,16 @@ module BitBar
         )
 
         statistics = metrics.each_with_object({}) do |metric, hash|
-          statistic = cloudwatch.get_metric_statistics(
+          sum = cloudwatch.get_metric_statistics(
             namespace:   metric['Namespace'],
             metric_name: metric['MetricName'],
             dimensions:  metric['Dimensions'].to_json,
-          )
+            statistics:  'Sum',
+          ).fetch(0).fetch('Sum')
 
           service_name = find_value('ServiceName', from: metric['Dimensions']) || 'Total'
 
-          hash[service_name] = statistic
+          hash[service_name] = sum
         end
 
         render(statistics: statistics)
