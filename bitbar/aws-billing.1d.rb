@@ -28,7 +28,7 @@ module BitBar
         {
           namespace:   @metric['Namespace'],
           metric_name: @metric['MetricName'],
-          dimensions:  @metric['Dimensions'].to_json,
+          dimensions:  @metric['Dimensions'],
           start_time:  @start_time,
           end_time:    @end_time,
           period:      @period,
@@ -71,6 +71,8 @@ module BitBar
 
     class CloudWatch
       def list_metrics(namespace:, metric_name:, dimensions:, region: 'us-east-1')
+        dimensions = normalize_dimensions(dimensions)
+
         command = %Q|aws cloudwatch list-metrics \
                         --namespace '#{namespace}' \
                         --metric-name '#{metric_name}' \
@@ -83,6 +85,8 @@ module BitBar
       end
 
       def get_metric_statistics(namespace:, metric_name:, dimensions:, statistics:, start_time:, end_time:, period:, region: 'us-east-1')
+        dimensions = normalize_dimensions(dimensions)
+
         command = %Q|aws cloudwatch get-metric-statistics \
                         --namespace '#{namespace}' \
                         --metric-name '#{metric_name}' \
@@ -103,6 +107,14 @@ module BitBar
 
         JSON.parse(source)
       end
+
+      def normalize_dimensions(dimensions)
+        if dimensions.is_a?(Hash) || dimensions.is_a?(Array)
+          dimensions.to_json
+        else
+          dimensions
+        end
+      end
     end
 
     class App
@@ -118,7 +130,7 @@ module BitBar
 
         metrics = cloudwatch.list_metrics(
           namespace:    'AWS/Billing',
-          dimensions:   [ { Name: 'Currency', Value: 'USD' } ].to_json,
+          dimensions:   [ { Name: 'Currency', Value: 'USD' } ],
           metric_name: 'EstimatedCharges',
         )
 
