@@ -5,71 +5,71 @@ require 'json'
 
 module BitBar
   module AwsBilling
-    class CloudWatch
-      class Metric
-        class Statistics
-          def initialize(start_time:, end_time:, period:, metric:, cloudwatch:)
-            @start_time = start_time
-            @end_time   = end_time
-            @period     = period
-            @metric     = metric
-            @cloudwatch = cloudwatch
-          end
-
-          def sum
-            params = build_params.merge(statistics: 'Sum')
-
-            statistics = @cloudwatch.get_metric_statistics(params)
-
-            statistics.fetch(0).fetch('Sum')
-          end
-
-          private
-
-          def build_params
-            {
-              namespace:   @metric['Namespace'],
-              metric_name: @metric['MetricName'],
-              dimensions:  @metric['Dimensions'].to_json,
-              start_time:  @start_time,
-              end_time:    @end_time,
-              period:      @period,
-            }
-          end
-        end
-
-        attr_reader :metric, :cloudwatch
-
-        def initialize(metric:, cloudwatch:)
-          @metric     = metric
-          @cloudwatch = cloudwatch
-        end
-
-        def service_name
-          find_value_from_dementions_by(name: 'ServiceName')
-        end
-
-        def [](name)
-          metric[name]
-        end
-
-        def build_statistics(start_time:, end_time:, period:)
-          Statistics.new(
-            start_time: start_time,
-            end_time:   end_time,
-            period:     period,
-            metric:     self,
-            cloudwatch: cloudwatch,
-          )
-        end
-
-        private
-
-        def find_value_from_dementions_by(name:)
-          metric['Dimensions'].find { |d| d['Name'] == name }&.fetch('Value')
-        end
+    class MetricStatistics
+      def initialize(start_time:, end_time:, period:, metric:, cloudwatch:)
+        @start_time = start_time
+        @end_time   = end_time
+        @period     = period
+        @metric     = metric
+        @cloudwatch = cloudwatch
       end
 
+      def sum
+        params = build_params.merge(statistics: 'Sum')
+
+        statistics = @cloudwatch.get_metric_statistics(params)
+
+        statistics.fetch(0).fetch('Sum')
+      end
+
+      private
+
+      def build_params
+        {
+          namespace:   @metric['Namespace'],
+          metric_name: @metric['MetricName'],
+          dimensions:  @metric['Dimensions'].to_json,
+          start_time:  @start_time,
+          end_time:    @end_time,
+          period:      @period,
+        }
+      end
+    end
+
+    class Metric
+      attr_reader :metric, :cloudwatch
+
+      def initialize(metric:, cloudwatch:)
+        @metric     = metric
+        @cloudwatch = cloudwatch
+      end
+
+      def service_name
+        find_value_from_dementions_by(name: 'ServiceName')
+      end
+
+      def [](name)
+        metric[name]
+      end
+
+      def build_statistics(start_time:, end_time:, period:)
+        MetricStatistics.new(
+          start_time: start_time,
+          end_time:   end_time,
+          period:     period,
+          metric:     self,
+          cloudwatch: cloudwatch,
+        )
+      end
+
+      private
+
+      def find_value_from_dementions_by(name:)
+        metric['Dimensions'].find { |d| d['Name'] == name }&.fetch('Value')
+      end
+    end
+
+    class CloudWatch
       def list_metrics(namespace:, metric_name:, dimensions:, region: 'us-east-1')
         command = %Q|aws cloudwatch list-metrics \
                         --namespace '#{namespace}' \
