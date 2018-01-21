@@ -148,17 +148,13 @@ module BitBar
       private
 
       def render(sums:)
-        puts "$#{sums['Total']} | image=#{@icon}"
-
-        puts '---'
-
-        sums.each do |name, sum|
-          puts "#{name}: $#{sum} | color=grey"
-        end
-
-        puts '---'
-
-        puts 'Open CloudWatch | href=https://console.aws.amazon.com/cloudwatch/home'
+        puts <<-VIEW.gsub(/^ */, '')
+          $#{sums['Total']} | image=#{@icon}
+          ---
+          #{sums.map { |name, sum| "#{name}: $#{sum}" }.join("\n") }
+          ---
+          Open CloudWatch | href=https://console.aws.amazon.com/cloudwatch/home
+        VIEW
       end
 
       def cloudwatch
