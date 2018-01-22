@@ -158,7 +158,7 @@ module BitBar
         puts <<-VIEW.gsub(/^ */, '')
           $#{sums['Total']} | image=#{@icon}
           ---
-          #{sums.map { |name, sum| "#{name}: $#{sum}" }.join("\n") }
+          #{sums.map { |name, sum| "#{name}: $#{sum} | color=grey" }.join("\n") }
           ---
           Open CloudWatch | href=https://console.aws.amazon.com/cloudwatch/home
         VIEW
