@@ -2,6 +2,7 @@
 
 require 'date'
 require 'json'
+require 'shellwords'
 
 module BitBar
   module AwsBilling
@@ -73,11 +74,12 @@ module BitBar
       def list_metrics(namespace:, metric_name:, dimensions:, region: 'us-east-1')
         dimensions = normalize_dimensions(dimensions)
 
-        command = %Q|aws cloudwatch list-metrics \
-                        --namespace '#{namespace}' \
-                        --metric-name '#{metric_name}' \
-                        --region '#{region}' \
-                        --dimensions '#{dimensions}'|
+        command =  %w|aws cloudwatch list-metrics|.tap { |builder|
+          builder << '--namespace'   << namespace
+          builder << '--metric-name' << metric_name
+          builder << '--region'      << region
+          builder << '--dimensions'  << dimensions
+        }
 
         metrics = run(command).fetch('Metrics')
 
@@ -87,15 +89,16 @@ module BitBar
       def get_metric_statistics(namespace:, metric_name:, dimensions:, statistics:, start_time:, end_time:, period:, region: 'us-east-1')
         dimensions = normalize_dimensions(dimensions)
 
-        command = %Q|aws cloudwatch get-metric-statistics \
-                        --namespace '#{namespace}' \
-                        --metric-name '#{metric_name}' \
-                        --start-time '#{start_time}' \
-                        --end-time '#{end_time}' \
-                        --period '#{period}' \
-                        --statistics '#{statistics}' \
-                        --region '#{region}' \
-                        --dimensions '#{dimensions}'|
+        command = %w|aws cloudwatch get-metric-statistics|.tap { |builder|
+          builder << '--namespace'   << namespace
+          builder << '--metric-name' << metric_name
+          builder << '--start-time'  << start_time
+          builder << '--end-time'    << end_time
+          builder << '--period'      << period
+          builder << '--statistics'  << statistics
+          builder << '--region'      << region
+          builder << '--dimensions'  << dimensions
+        }
 
         run(command).fetch('Datapoints')
       end
@@ -103,6 +106,10 @@ module BitBar
       private
 
       def run(command)
+        if command.is_a?(Array)
+          command = command.map { |c| Shellwords.escape(c) }.join(' ')
+        end
+
         source = open("| #{command}") { |io| io.read }
 
         JSON.parse(source)
