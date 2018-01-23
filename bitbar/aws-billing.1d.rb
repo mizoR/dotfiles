@@ -5,7 +5,7 @@
 # <bitbar.version>v0.0.1</bitbar.version>
 # <bitbar.author>mizoR</bitbar.author>
 # <bitbar.author.github>mizoR</bitbar.author.github>
-# <bitbar.image>https://user-images.githubusercontent.com/1257116/35275379-e009fb3a-0082-11e8-9746-5f32f64bea19.png</bitbar.image>
+# <bitbar.image>https://user-images.githubusercontent.com/1257116/35283248-140367c4-009b-11e8-8895-dc44ae933a42.png</bitbar.image>
 # <bitbar.dependencies>ruby,awscli</bitbar.dependencies>
 
 require 'date'
