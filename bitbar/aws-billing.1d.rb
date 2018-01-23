@@ -169,7 +169,7 @@ module BitBar
           ---
           #{sums.map { |name, sum| "#{name.ljust(20)} $#{sum} | color=grey font=Menlo" }.join("\n") }
           ---
-          Open CloudWatch | href=https://console.aws.amazon.com/cloudwatch/home font=Menlo
+          Open Billing | href=https://console.aws.amazon.com/billing/home font=Menlo
         VIEW
       end
 
