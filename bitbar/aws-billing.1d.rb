@@ -77,14 +77,18 @@ module BitBar
     end
 
     class CloudWatch
-      def list_metrics(namespace:, metric_name:, dimensions:, region: 'us-east-1')
+      def initialize(region:)
+        @region = region
+      end
+
+      def list_metrics(namespace:, metric_name:, dimensions:)
         dimensions = normalize_dimensions(dimensions)
 
         command =  %w|aws cloudwatch list-metrics|.tap { |builder|
           builder << '--namespace'   << namespace
           builder << '--metric-name' << metric_name
-          builder << '--region'      << region
           builder << '--dimensions'  << dimensions
+          builder << '--region'      << @region
         }
 
         metrics = run(command).fetch('Metrics')
@@ -92,7 +96,7 @@ module BitBar
         metrics.map { |m| Metric.new(metric: m, cloudwatch: self) }
       end
 
-      def get_metric_statistics(namespace:, metric_name:, dimensions:, statistics:, start_time:, end_time:, period:, region: 'us-east-1')
+      def get_metric_statistics(namespace:, metric_name:, dimensions:, statistics:, start_time:, end_time:, period:)
         dimensions = normalize_dimensions(dimensions)
 
         command = %w|aws cloudwatch get-metric-statistics|.tap { |builder|
@@ -102,8 +106,8 @@ module BitBar
           builder << '--end-time'    << end_time
           builder << '--period'      << period
           builder << '--statistics'  << statistics
-          builder << '--region'      << region
           builder << '--dimensions'  << dimensions
+          builder << '--region'      << @region
         }
 
         run(command).fetch('Datapoints')
@@ -163,14 +167,14 @@ module BitBar
         puts <<-VIEW.gsub(/^ */, '')
           $#{sums['Total']} | image=#{@icon}
           ---
-          #{sums.map { |name, sum| "#{name}: $#{sum} | color=grey" }.join("\n") }
+          #{sums.map { |name, sum| "#{name.ljust(20)} $#{sum} | color=grey font=Menlo" }.join("\n") }
           ---
-          Open CloudWatch | href=https://console.aws.amazon.com/cloudwatch/home
+          Open CloudWatch | href=https://console.aws.amazon.com/cloudwatch/home font=Menlo
         VIEW
       end
 
       def cloudwatch
-        @cloudwatch ||= BitBar::AwsBilling::CloudWatch.new
+        @cloudwatch ||= BitBar::AwsBilling::CloudWatch.new(region: 'us-east-1')
       end
     end
   end
