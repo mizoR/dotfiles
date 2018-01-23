@@ -38,8 +38,6 @@ module BitBar
     end
 
     class Metric
-      attr_reader :metric, :cloudwatch
-
       def initialize(metric:, cloudwatch:)
         @metric     = metric
         @cloudwatch = cloudwatch
@@ -50,7 +48,7 @@ module BitBar
       end
 
       def [](name)
-        metric[name]
+        @metric[name]
       end
 
       def build_statistics(start_time:, end_time:, period:)
@@ -59,14 +57,14 @@ module BitBar
           end_time:   end_time,
           period:     period,
           metric:     self,
-          cloudwatch: cloudwatch,
+          cloudwatch: @cloudwatch,
         )
       end
 
       private
 
       def find_value_from_dementions_by(name:)
-        metric['Dimensions'].find { |d| d['Name'] == name }&.fetch('Value')
+        @metric['Dimensions'].find { |d| d['Name'] == name }&.fetch('Value')
       end
     end
 
@@ -126,8 +124,7 @@ module BitBar
 
     class App
       def initialize(icon:)
-        @icon       = icon
-        @cloudwatch = BitBar::AwsBilling::CloudWatch.new
+        @icon = icon
       end
 
       def run(date:)
@@ -165,7 +162,7 @@ module BitBar
       end
 
       def cloudwatch
-        @cloudwatch
+        @cloudwatch ||= BitBar::AwsBilling::CloudWatch.new
       end
     end
   end
