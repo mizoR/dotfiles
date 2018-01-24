@@ -139,10 +139,11 @@ module BitBar
         @icon = icon
       end
 
-      def run(date:)
-        start_time = (date - 1).to_datetime
-        end_time   = date.to_datetime - Rational(1, 86400)
-        period     = 86400
+      def run
+        now        = Time.now.utc
+        start_time = Time.utc(now.year, now.month)
+        end_time   = Time.utc(now.year, now.month, now.day, now.hour, now.min)
+        period     = (end_time - start_time).to_i
 
         metrics = cloudwatch.list_metrics(
           namespace:    'AWS/Billing',
@@ -153,21 +154,26 @@ module BitBar
         sums = metrics.each_with_object({}) do |metric, hash|
           service_name = metric.service_name || 'Total'
 
-          statistics = metric.build_statistics(start_time: start_time, end_time: end_time, period: period)
+          statistics = metric.build_statistics(
+            start_time: start_time.to_datetime,
+            end_time:   end_time.to_datetime,
+            period:     period,
+          )
 
           hash[service_name] = statistics.sum
         end
 
-        render(sums: sums)
+        render(start_time: start_time, end_time: end_time, sums: sums)
       end
 
       private
 
-      def render(sums:)
+      def render(start_time:, end_time:, sums:)
         puts <<-VIEW.gsub(/^ */, '')
           $#{sums['Total']} | image=#{@icon}
           ---
-          #{sums.map { |name, sum| "#{name.ljust(20)} $#{sum} | color=grey font=Menlo" }.join("\n") }
+          #{start_time.to_date} ~ #{end_time.to_date} | color=grey font=Menlo-Bold
+          #{sums.map { |name, sum| "#{name.ljust(18)} $#{sum} | color=grey font=Menlo" }.join("\n") }
           ---
           Open Billing | href=https://console.aws.amazon.com/billing/home font=Menlo
         VIEW
@@ -187,7 +193,7 @@ if __FILE__ == $0
 
   config = YAML.load(DATA.read).each_with_object({}) { |(k, v), h| h[k.to_sym] = v }
 
-  BitBar::AwsBilling::App.new(config).run(date: Date.today)
+  BitBar::AwsBilling::App.new(config).run
 end
 
 __END__
