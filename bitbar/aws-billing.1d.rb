@@ -160,7 +160,14 @@ module BitBar
             period:     period,
           )
 
-          hash[service_name] = statistics.sum
+          begin
+            hash[service_name] = statistics.sum
+          rescue => e   # HACK: Sometimes fetching sum seems to be failed.  Maybe it is on first day of month?
+            if ENV['VERBOSE']
+              $stderr.puts "Failed to fetch sum (service_name: #{service_name})"
+              $stderr.puts "#{e.class}: #{e.message}"
+            end
+          end
         end
 
         render(start_time: start_time, end_time: end_time, sums: sums)
