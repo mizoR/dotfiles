@@ -14,6 +14,10 @@ require 'shellwords'
 
 module BitBar
   module AwsBilling
+    Error = Class.new(StandardError)
+
+    MetricStatisticsNotFound = Class.new(Error)
+
     class MetricStatistics
       def initialize(start_time:, end_time:, period:, metric:, cloudwatch:)
         @start_time = start_time
@@ -28,7 +32,11 @@ module BitBar
 
         statistics = @cloudwatch.get_metric_statistics(params)
 
-        statistics.fetch(0).fetch('Sum')
+        if statistics.size > 0
+          statistics.fetch(0).fetch('Sum')
+        else
+          raise MetricStatisticsNotFound
+        end
       end
 
       private
@@ -162,11 +170,8 @@ module BitBar
 
           begin
             hash[service_name] = statistics.sum
-          rescue => e   # HACK: Sometimes fetching sum seems to be failed.  Maybe it is on first day of month?
-            if ENV['VERBOSE']
-              $stderr.puts "Failed to fetch sum (service_name: #{service_name})"
-              $stderr.puts "#{e.class}: #{e.message}"
-            end
+          rescue BitBar::AwsBilling::MetricStatisticsNotFound
+            # XXX: Sometimes sum metric statistics cannot be found.
           end
         end
 
