@@ -14,10 +14,6 @@ require 'shellwords'
 
 module BitBar
   module AwsBilling
-    Error = Class.new(StandardError)
-
-    MetricStatisticsNotFound = Class.new(Error)
-
     class MetricStatistics
       def initialize(start_time:, end_time:, period:, metric:, cloudwatch:)
         @start_time = start_time
@@ -25,21 +21,28 @@ module BitBar
         @period     = period
         @metric     = metric
         @cloudwatch = cloudwatch
+        @statistics = {}
       end
 
       def sum
+        if @statistics.key?(:sum)
+          return @statistics.fetch(:sum)
+        end
+
+        @statistics[:sum] = get_sum
+      end
+
+      private
+
+      def get_sum
         params = build_params.merge(statistics: 'Sum')
 
         statistics = @cloudwatch.get_metric_statistics(params)
 
         if statistics.size > 0
           statistics.fetch(0).fetch('Sum')
-        else
-          raise MetricStatisticsNotFound
         end
       end
-
-      private
 
       def build_params
         {
@@ -168,10 +171,8 @@ module BitBar
             period:     period,
           )
 
-          begin
+          if statistics.sum
             hash[service_name] = statistics.sum
-          rescue BitBar::AwsBilling::MetricStatisticsNotFound
-            # XXX: Sometimes sum metric statistics cannot be found.
           end
         end
 
