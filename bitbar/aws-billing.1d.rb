@@ -188,7 +188,7 @@ module BitBar
           #{start_time.to_date} ~ #{end_time.to_date} | color=grey font=Menlo-Bold
           #{sums.map { |name, sum| "#{name.ljust(18)} $#{sum} | color=grey font=Menlo" }.join("\n") }
           ---
-          Open Billing | href=https://console.aws.amazon.com/billing/home font=Menlo
+          Open Bills | href=https://console.aws.amazon.com/billing/home?#/bills font=Menlo
         VIEW
       end
 
