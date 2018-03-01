@@ -202,6 +202,12 @@ end
 if __FILE__ == $0
   ENV['PATH'] = "/usr/local/bin:#{ENV['PATH']}"
 
+  if !system('which aws')
+    puts
+
+    exit 0
+  end
+
   require 'yaml'
 
   config = YAML.load(DATA.read).each_with_object({}) { |(k, v), h| h[k.to_sym] = v }
