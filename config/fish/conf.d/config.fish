@@ -37,6 +37,11 @@ if test -d ~/.nodebrew
   set -gx PATH $NODEBREW_ROOT/current/bin $PATH
 end
 
+if test -d $HOME/.cargo
+  set -gx PATH $HOME/.cargo/bin $PATH
+end
+
+
 if test -d ~/dotfiles/bin
   set -gx PATH ~/dotfiles/bin $PATH
 end
