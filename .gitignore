@@ -2,6 +2,8 @@
 /vim/backups
 /vim/bundle/*
 /vim/view/
+/bitbar/jira.5m.py
+/bitbar/icon.base64
 !/vim/bundle/neobundle.vim
 /bitbar/db
 !/bitbar/db/.gitkeep
