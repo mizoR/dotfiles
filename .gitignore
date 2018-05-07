@@ -3,6 +3,7 @@
 /vim/bundle/*
 /vim/view/
 /bitbar/jira.5m.py
+/bitbar/github.5m.py
 !/vim/bundle/neobundle.vim
 /bitbar/db
 !/bitbar/db/.gitkeep
