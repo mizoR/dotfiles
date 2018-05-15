@@ -26,6 +26,8 @@
   cancel = !git commit -a -m 'Temporary commit for cancel' && git reset --hard HEAD~
   # https://speakerdeck.com/hotchpotch/pull-request-woli-yong-sitakai-fa-wakuhuro#47
   fetch-pulls = !git fetch origin +refs/pull/*:refs/remotes/pull/*
+  # @see https://stackoverflow.com/a/9652183
+  sed = ! git grep -z --full-name -l '.' | xargs -0 sed -i ''
 [merge]
   tool = vimdiff
   ff = false
