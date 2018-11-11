@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+if [ ! -p /dev/stdin ]; then
+  echo 'usage:'
+  echo '    echo path/to/your-awesome-curlrc | kurl'
+
+  exit 0
+fi
+
+conf=$(mktemp)
+
+cat - > $conf
+
+curl -K $conf $@
+
+stat=$?
+
+rm $conf
+
+exit $stat
