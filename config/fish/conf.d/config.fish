@@ -50,3 +50,12 @@ which direnv >/dev/null 2>&1
 if test $status -eq 0
   eval (direnv hook fish)
 end
+
+
+function fish_user_key_bindings
+  # Override keybind because of keybind confiction
+  bind \cg '__ghq_crtl_g'
+  if bind -M insert >/dev/null ^/dev/null
+    bind -M insert \cg '__ghq_crtl_g'
+  end
+end
