@@ -54,8 +54,8 @@ end
 
 function fish_user_key_bindings
   # Override keybind because of keybind confiction
-  bind \cg '__ghq_crtl_g'
+  bind \cg '__ghq_repository_search'
   if bind -M insert >/dev/null ^/dev/null
-    bind -M insert \cg '__ghq_crtl_g'
+    bind -M insert \cg '__ghq_repository_search'
   end
 end
