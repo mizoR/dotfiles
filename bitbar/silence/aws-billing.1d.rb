@@ -100,6 +100,7 @@ module BitBar
           builder << '--metric-name' << metric_name
           builder << '--dimensions'  << dimensions
           builder << '--region'      << @region
+          builder << '--output'      << 'json'
         }
 
         metrics = run(command).fetch('Metrics')
@@ -119,6 +120,7 @@ module BitBar
           builder << '--statistics'  << statistics
           builder << '--dimensions'  << dimensions
           builder << '--region'      << @region
+          builder << '--output'      << 'json'
         }
 
         run(command).fetch('Datapoints')
@@ -132,6 +134,8 @@ module BitBar
         end
 
         source = open("| #{command}") { |io| io.read }
+
+        puts source
 
         JSON.parse(source)
       end
