@@ -1,3 +1,7 @@
 [github_contribution]
 username = "mizoR"
 max_contributions = 8
+
+[xday_count_down]
+xday_label_independence_day = ":girl: "
+xday_time_independence_day = "2028-03-30T23:59:59+09:00"
