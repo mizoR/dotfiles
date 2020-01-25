@@ -5,3 +5,10 @@ max_contributions = 8
 [xday_count_down]
 xday_label_independence_day = ":girl: "
 xday_time_independence_day = "2028-03-30T23:59:59+09:00"
+
+[remaining_time_to_spend_with_my_children]
+hours_a_day_during_infant             = 7
+hours_a_day_during_elementary         = 6
+hours_a_day_during_junior_high_school = 4
+hours_a_day_during_high_school        = 3
+hours_a_day_during_college_or_later   = 2
