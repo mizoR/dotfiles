@@ -1,3 +1,6 @@
-NeoBundle 'fatih/vim-go'
-
-let g:go_fmt_command = "goimports"
+NeoBundle 'prabirshrestha/async.vim'
+NeoBundle 'prabirshrestha/asyncomplete.vim'
+NeoBundle 'prabirshrestha/asyncomplete-lsp.vim'
+NeoBundle 'prabirshrestha/vim-lsp'
+NeoBundle 'mattn/vim-lsp-settings'
+NeoBundle 'mattn/vim-goimports'
